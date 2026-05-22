@@ -1,54 +1,56 @@
-"""
-Windows-compatible Safe Eyes bootstrap
-Temporary replacement for Linux GTK implementation
-"""
-
 import time
 import threading
+from plyer import notification
 
 
 class SafeEyes:
-    def __init__(self, locale=None):
-        self.locale = locale
+    def __init__(self):
         self.running = True
+        self.reminder_count = 0
 
-    def run(self, argv):
-        print("\n=================================")
+        # Timing settings
+        self.work_interval = 20
+        self.break_message = (
+            "Look away from the screen for 20 seconds.\n"
+            "Blink your eyes."
+        )
+
+    def show_notification(self):
+        notification.notify(
+            title="Safe Eyes Reminder",
+            message=self.break_message,
+            timeout=5
+        )
+
+    def reminder_loop(self):
+        while self.running:
+            time.sleep(self.work_interval)
+
+            self.reminder_count += 1
+
+            print(f"\n[Safe Eyes] Reminder #{self.reminder_count}")
+
+            self.show_notification()
+
+    def run(self):
+        print("=" * 32)
         print(" Safe Eyes Windows Prototype ")
-        print("=================================\n")
+        print("=" * 32)
 
-        print("Safe Eyes is now running on Windows prototype mode.")
-        print("This is NOT full functionality yet.")
-        print()
+        print("\nWindows notifications enabled.")
+        print("Press CTRL + C to stop.\n")
 
-        print("Features currently simulated:")
-        print("- Break timer")
-        print("- Console notifications")
-        print("- Background loop")
-        print()
+        reminder_thread = threading.Thread(
+            target=self.reminder_loop
+        )
 
-        thread = threading.Thread(target=self.break_loop)
-        thread.daemon = True
-        thread.start()
+        reminder_thread.daemon = True
+        reminder_thread.start()
 
         try:
-            while True:
+            while self.running:
                 time.sleep(1)
+
         except KeyboardInterrupt:
-            self.quit()
-
-    def break_loop(self):
-        counter = 0
-
-        while self.running:
-            time.sleep(10)
-            counter += 1
-
-            print(f"\n[Safe Eyes] Reminder #{counter}")
-            print("Look away from the screen for 20 seconds.")
-            print("Blink your eyes.")
-            print()
-
-    def quit(self):
-        print("\nClosing Safe Eyes...")
-        self.running = False
+            print("\nClosing Safe Eyes...")
+            self.running = False
