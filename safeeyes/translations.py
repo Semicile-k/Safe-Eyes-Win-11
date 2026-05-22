@@ -21,26 +21,32 @@
 import locale
 import gettext
 import sys
-from safeeyes import utility
+try:
+    from safeeyes import utility
+except ImportError:
+    utility = None
 
 _translations = gettext.NullTranslations()
 
 
 def setup() -> gettext.NullTranslations:
     global _translations
+
+    if utility is None:
+        return gettext.NullTranslations()
+
     _translations = gettext.translation(
         "safeeyes",
         localedir=utility.LOCALE_PATH,
         languages=[utility.system_locale(), "en_US"],
         fallback=True,
     )
+
     try:
-        # locale.bindtextdomain is required for Glade files
         locale.bindtextdomain("safeeyes", utility.LOCALE_PATH)
     except AttributeError:
         print(
-            "installed python's gettext module does not support locale.bindtextdomain."
-            " locale.bindtextdomain is required for Glade files",
+            "installed python's gettext module does not support locale.bindtextdomain.",
             file=sys.stderr,
         )
 
